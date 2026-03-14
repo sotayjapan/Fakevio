@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MoMo Event Generator - Locked</title>
+    <style>
+        :root {
+            --momo-primary: #D82D8B;
+            --text-default: #303233;
+            --bg-light: #FDF2F8;
+        }
+
+        /* KHÓA CUỘN & ZOOM TRÊN TOÀN BỘ TRANG */
+        html, body {
+            overflow-x: hidden;
+            touch-action: pan-y; /* Chỉ cho phép cuộn lên xuống, không cho zoom */
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            color: var(--text-default);
+            user-select: none; /* Ngăn chặn bôi đen text làm lệch khung */
+        }
+
+        .editor-card {
+            background: white;
+            width: 100%;
+            max-width: 380px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(216, 45, 139, 0.1);
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .input-group { margin-bottom: 12px; }
+        
+        label {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            color: #727272;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #F0F0F0;
+            border-radius: 10px;
+            font-size: 16px; /* Để từ 16px trở lên iOS sẽ không tự động zoom khi gõ */
+            background: #FAFAFA;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            background: var(--momo-primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            active: transform: scale(0.98);
+        }
+
+        /* KHUNG CHỨA CANVAS CỐ ĐỊNH */
+        .canvas-wrap {
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            line-height: 0;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+            touch-action: none; /* Khóa mọi thao tác chạm trên ảnh */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="editor-card">
+        <div class="input-group">
+            <label>Giờ iPhone</label>
+            <input type="text" id="iptTime">
+        </div>
+        <div class="input-group">
+            <label>Họ và Tên</label>
+            <input type="text" id="iptName" placeholder="NGUYEN VAN TU" oninput="this.value = this.value.toUpperCase()">
+        </div>
+        <div class="input-group">
+            <label>Số Điện Thoại</label>
+            <input type="text" id="iptPhone" placeholder="0366xxxxxx">
+        </div>
+        <button onclick="download()">TẢI ẢNH NGAY</button>
+    </div>
+
+    <div class="canvas-wrap">
+        <canvas id="canvas"></canvas>
+    </div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.src = 'image.png'; 
+
+    document.getElementById('iptTime').value = new Date().toLocaleTimeString('vi-VN', {
+        hour: '2-digit', minute: '2-digit', hour12: false
+    });
+
+    img.onload = () => render();
+
+    function render() {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        const time = document.getElementById('iptTime').value;
+        const name = document.getElementById('iptName').value;
+        const phone = document.getElementById('iptPhone').value;
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        // 1. Vẽ GIỜ
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 34px -apple-system, BlinkMacSystemFont, sans-serif";
+        ctx.textAlign = "center";
+        ctx.letterSpacing = "-1px"; 
+        ctx.fillText(time, 95, 82); 
+
+        // 2. Vẽ THÔNG TIN
+        ctx.fillStyle = "#303233";
+        ctx.textAlign = "left";
+        ctx.letterSpacing = "0px";
+        ctx.font = "400 36px -apple-system, BlinkMacSystemFont, sans-serif";
+        
+        ctx.fillText(name, 75, 1255); 
+        ctx.fillText(phone, 75, 1438);
+    }
+
+    document.querySelectorAll('input').forEach(i => i.addEventListener('input', render));
+
+    function download() {
+        const link = document.createElement('a');
+        link.download = `MoMo_${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png', 1.0);
+        link.click();
+    }
+</script>
+</body>
+</html>
